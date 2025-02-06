@@ -1,0 +1,101 @@
+---
+- name: Install Docker and Build Images on EC2 instances
+  hosts: ec2_instances
+  become: yes
+  tasks:
+    - name: Update the apt package index
+      apt:
+        update_cache: yes
+
+    - name: Install Docker dependencies
+      apt:
+        name:
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - software-properties-common
+        state: present
+
+    - name: Add Docker GPG key
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+
+    - name: Add Docker repository
+      apt_repository:
+        repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable
+        state: present
+
+    - name: Update the apt package index again
+      apt:
+        update_cache: yes
+
+    - name: Install Docker
+      apt:
+        name: docker-ce
+        state: present
+
+    - name: Start and enable Docker service
+      systemd:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Create Dockerfile on backend instance
+      copy:
+        dest: /home/ubuntu/Dockerfile
+        content: |
+          FROM openjdk:17-jdk
+          COPY target/backend-0.0.1-SNAPSHOT.jar /app/
+          WORKDIR /app/
+          ENTRYPOINT ["java", "-jar", "backend-0.0.1-SNAPSHOT.jar"]
+          EXPOSE 8080
+      when: inventory_hostname == 'backend_instance'
+
+    - name: Create Dockerfile on frontend instance
+      copy:
+        dest: /home/ubuntu/Dockerfile
+        content: |
+          FROM node:latest
+          WORKDIR /app
+          COPY package*.json ./
+          RUN npm install
+          COPY . .
+          EXPOSE 4200
+          CMD ["npx", "ng", "serve", "--host", "0.0.0.0", "--port", "4200"]
+      when: inventory_hostname == 'frontend_instance'
+
+    - name: Create Dockerfile_nginx on frontend instance
+      copy:
+        dest: /home/ubuntu/Dockerfile_nginx
+        content: |
+          FROM nginx:latest
+          COPY /dist/angular-frontend /usr/share
+      when: inventory_hostname == 'frontend_instance'
+
+    - name: Build Docker image on backend instance
+      command: docker build -t joelarias/backend-app .
+      when: inventory_hostname == 'backend_instance'
+
+    - name: Build Docker image on frontend instance
+      command: docker build -t joelarias/my-angular-app .
+      when: inventory_hostname == 'frontend_instance'
+
+    - name: Log in to Docker Hub
+      command: docker login -u joelarias -p Yivonne79@
+
+    - name: Tag Docker image on backend instance
+      command: docker tag backend-app joelarias/backend-app:latest
+      when: inventory_hostname == 'backend_instance'
+
+    - name: Tag Docker image on frontend instance
+      command: docker tag my-angular-app joelarias/my-angular-app:latest
+      when: inventory_hostname == 'frontend_instance'
+
+    - name: Push Docker image to Docker Hub from backend instance
+      command: docker push joelarias/backend-app:latest
+      when: inventory_hostname == 'backend_instance'
+
+    - name: Push Docker image to Docker Hub from frontend instance
+      command: docker push joelarias/my-angular-app:latest
+      when: inventory_hostname == 'frontend_instance'
