@@ -43,7 +43,7 @@
 
     - name: Create Dockerfile on backend instance
       copy:
-        dest: /home/ubuntu/backend-app/Dockerfile
+        dest: /home/ubuntu/spring-backend/Dockerfile
         content: | 
           FROM openjdk:17-jdk
           COPY target/backend-0.0.1-SNAPSHOT.jar /app/
