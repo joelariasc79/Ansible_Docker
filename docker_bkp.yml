@@ -43,8 +43,8 @@
 
     - name: Create Dockerfile on backend instance
       copy:
-        dest: /home/ubuntu/backend-app/Dockerfile
-        content: | 
+        dest: /home/ubuntu/spring-backend/Dockerfile
+        content: |
           FROM openjdk:17-jdk
           COPY target/backend-0.0.1-SNAPSHOT.jar /app/
           WORKDIR /app/
@@ -74,11 +74,11 @@
       when: inventory_hostname == 'frontend_instance'
 
     - name: Build Docker image on backend instance
-      command: docker build -t joelarias/backend-app /home/ubuntu/backend-app
+      command: docker build -t joelarias/backend-app .
       when: inventory_hostname == 'backend_instance'
 
     - name: Build Docker image on frontend instance
-      command: docker build -t joelarias/my-angular-app /home/ubuntu/angular-frontend
+      command: docker build -t joelarias/my-angular-app .
       when: inventory_hostname == 'frontend_instance'
 
     - name: Log in to Docker Hub
