@@ -74,7 +74,7 @@
       when: inventory_hostname == 'frontend_instance'
 
     - name: Build Docker image on backend instance
-      command: docker build -t joelarias/backend-app /home/ubuntu/backend-app
+      command: docker build -t joelarias/backend-app /home/ubuntu/spring-backend
       when: inventory_hostname == 'backend_instance'
 
     - name: Build Docker image on frontend instance
@@ -85,11 +85,11 @@
       command: docker login -u joelarias -p Yivonne79@
 
     - name: Tag Docker image on backend instance
-      command: docker tag backend-app joelarias/backend-app:latest
+      command: docker tag joelarias/backend-app joelarias/backend-app:latest
       when: inventory_hostname == 'backend_instance'
 
     - name: Tag Docker image on frontend instance
-      command: docker tag my-angular-app joelarias/my-angular-app:latest
+      command: docker tag joelarias/my-angular-app joelarias/my-angular-app:latest
       when: inventory_hostname == 'frontend_instance'
 
     - name: Push Docker image to Docker Hub from backend instance
