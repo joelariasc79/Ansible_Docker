@@ -43,7 +43,7 @@
 
     - name: Create Dockerfile on backend instance
       copy:
-        dest: /home/ubuntu/Dockerfile
+        dest: /home/ubuntu/spring-backend/Dockerfile
         content: |
           FROM openjdk:17-jdk
           COPY target/backend-0.0.1-SNAPSHOT.jar /app/
@@ -54,7 +54,7 @@
 
     - name: Create Dockerfile on frontend instance
       copy:
-        dest: /home/ubuntu/Dockerfile
+        dest: /home/ubuntu/angular-frontend/Dockerfile
         content: |
           FROM node:latest
           WORKDIR /app
@@ -67,7 +67,7 @@
 
     - name: Create Dockerfile_nginx on frontend instance
       copy:
-        dest: /home/ubuntu/Dockerfile_nginx
+        dest: /home/ubuntu/angular-frontend/Dockerfile_nginx
         content: |
           FROM nginx:latest
           COPY /dist/angular-frontend /usr/share
